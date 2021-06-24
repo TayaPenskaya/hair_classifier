@@ -1,22 +1,30 @@
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision.models.resnet import Bottleneck, BasicBlock
-from operations import *
+
 from collections import defaultdict
 import math
 import pdb
 import torchvision
 # import genotypes
 import time
-from dataset import *
-from layers import *
-from bi_fpn import BiFPN_PRIMITIVES, BiFPN_Neck_From_Genotype
-from layers.box_utils import match_anchors, decode, encode
 import numbers
 from torchvision.ops import roi_align
 from collections import OrderedDict
+
+try:
+    from operations import *
+    from dataset import *
+    from layers import *
+    from bi_fpn import BiFPN_PRIMITIVES, BiFPN_Neck_From_Genotype
+    from layers.box_utils import match_anchors, decode, encode
+except ImportError:
+    from .operations import *
+    from .dataset import *
+    from .layers import *
+    from .bi_fpn import BiFPN_PRIMITIVES, BiFPN_Neck_From_Genotype
+    from .layers.box_utils import match_anchors, decode, encode
 
 if torch.__version__ == "1.1.0":
     dtype = torch.uint8

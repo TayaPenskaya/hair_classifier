@@ -1,12 +1,15 @@
 import torch
 import torch.nn as nn
-from operations import OPS, BN_OPS, NORMAL_OPS
-
 import torch.nn.functional as F
 import math
 # from genotypes import FPN_Genotype
 
-from dataset.config import widerface_640 as cfg
+try:
+    from dataset.config import widerface_640 as cfg
+    from operations import OPS, BN_OPS, NORMAL_OPS
+except ImportError:
+    from .dataset.config import widerface_640 as cfg
+    from .operations import OPS, BN_OPS, NORMAL_OPS
 
 # FPN_Genotype = namedtuple("FPN_Genotype", "Inter_Layer Out_Layer")
 

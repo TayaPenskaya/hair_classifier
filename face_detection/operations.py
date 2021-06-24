@@ -2,7 +2,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from dataset.config import widerface_640 as cfg
+try:
+    from dataset.config import widerface_640 as cfg
+except ImportError:
+    from .dataset.config import widerface_640 as cfg
 # from layers.DCNv2 import DCN
 
 RELU_FIRST = True

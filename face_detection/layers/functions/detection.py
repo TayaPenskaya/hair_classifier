@@ -10,8 +10,12 @@ from __future__ import division
 import torch
 import torch.nn as nn
 from ..box_utils import decode, nms, center_size
-from dataset import widerface_640 as cfg
 import pdb
+
+try:
+    from dataset.config import widerface_640 as cfg
+except ImportError:
+    from ...dataset.config import widerface_640 as cfg
 
 
 class Detect(nn.Module):
