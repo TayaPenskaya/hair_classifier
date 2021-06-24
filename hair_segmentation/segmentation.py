@@ -1,5 +1,6 @@
 import cv2
 import os
+import glob
 import os.path as osp
 import numpy as np
 import argparse
@@ -8,17 +9,21 @@ from PIL import Image
 from skimage.filters import gaussian
 from skimage.transform import resize
 
-from model import BiSeNet
 import torch
 import torchvision.transforms as transforms
 
+try:
+    from model import BiSeNet
+except ImportError:
+    from .model import BiSeNet
+    
 class FaceParsing:
     
     def __init__(self, model_path='cp/79999_iter.pth'):
         self.n_classes = 19
         self.net = BiSeNet(n_classes=self.n_classes)
         self.net.cuda()
-        self.net.load_state_dict(torch.load(cp))
+        self.net.load_state_dict(torch.load(model_path))
         self.net.eval()
         
     def get_parsing(self, image_path):
@@ -97,7 +102,7 @@ def get_face_segmentation(image, parsing, stride, save_im=False, save_path='vis_
 
 def parse_args():
     parse = argparse.ArgumentParser()
-    parse.add_argument('--img-path', default='imgs/116.jpg')
+    parse.add_argument('--in-dir', default='imgs/')
     parse.add_argument('--out-dir', default='results/')
     parse.add_argument('--model-path', default='cp/79999_iter.pth')
     return parse.parse_args()
@@ -105,18 +110,24 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
-
-    image_path = args.img_path
-    cp = args.model_path
-
-    image = cv2.imread(image_path)
-    name = os.path.splitext(os.path.basename(image_path))[0]
-    out_path_hair = os.path.join(args.out_dir, name + '_hair.jpg')
-    out_path_face = os.path.join(args.out_dir, name + '_face.jpg')
     
     fp = FaceParsing()
-    parsing = fp.get_parsing(image_path)
-    parsing = cv2.resize(parsing, image.shape[0:2][::-1], interpolation=cv2.INTER_NEAREST)
-    face = get_face_segmentation(image, parsing, stride=1, save_im=True, save_path=out_path_face)
-    hair_mask = get_hair_mask(image, parsing, save_im=True, save_path=out_path_hair)
+    
+    save_path = args.out_dir
+    os.makedirs(save_path, exist_ok=True)
+    
+    files = glob.glob(os.path.join(args.in_dir, "*.png")) + glob.glob(os.path.join(args.in_dir, "*.jpg")) + glob.glob(os.path.join(args.in_dir, "*.jpeg")) + glob.glob(os.path.join(args.in_dir, "*.bmp"))
+
+    for f in files:
+        img_name = f.split("/")[-1]
+
+        image = cv2.imread(f)
+        name = os.path.splitext(os.path.basename(img_name))[0]
+        out_path_hair = os.path.join(save_path, name + '_hair.jpg')
+        out_path_face = os.path.join(save_path, name + '_face.jpg')
+
+        parsing = fp.get_parsing(f)
+        parsing = cv2.resize(parsing, image.shape[0:2][::-1], interpolation=cv2.INTER_NEAREST)
+        face = get_face_segmentation(image, parsing, stride=1, save_im=True, save_path=out_path_face)
+        hair_mask = get_hair_mask(image, parsing, save_im=True, save_path=out_path_hair)
     
