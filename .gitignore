@@ -1,6 +1,8 @@
 #data
 data/
 archives/
+runs/
+train_data/
 
 
 # Byte-compiled / optimized / DLL files
