@@ -18,3 +18,8 @@ python main.py --in-dir "imgs/"
 - попробовать посчитать площадь, координаты, в общем, обойтись без изображений.
 
 Нагенерить в качестве дополнительных данных еще изображений для каждой категории.
+
+## Useful links
+
+- [face-detection](https://github.com/Tencent/FaceDetection-DSFD)
+- [face-parsing](https://github.com/zllrunning/face-parsing.PyTorch)
