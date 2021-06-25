@@ -3,6 +3,7 @@ import os
 import glob
 import torch
 import cv2
+import pandas as pd
 
 from PIL import Image
 from tqdm import tqdm
@@ -20,6 +21,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--in-dir", default='imgs', type=str, help="where images are stored")
     parser.add_argument("--out-dir", default='results', type=str, help="where results will be stored")
+    parser.add_argument("--out-csv", default='results.csv', type=str, help="where predictions will be stored")
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -41,7 +43,7 @@ if __name__ == '__main__':
     fd = FaceDetection()
     
     model = fine_tune_model()
-    model.load_state_dict(torch.load('checkpoints/12.pth'))
+    model.load_state_dict(torch.load('checkpoints/final.pth'))
     model.eval()
     
     preprocess=transforms.Compose([
@@ -52,8 +54,11 @@ if __name__ == '__main__':
                              [0.229, 0.224, 0.225])
     ])
     
+    predictions = {"name": [], "label": []}
+    
     for f in tqdm(files):
         img_name = f.split("/")[-1]
+        predictions["name"].append(f)
         
         with torch.no_grad():
             
@@ -76,6 +81,9 @@ if __name__ == '__main__':
                 outputs = model(inputs)
                 _, preds = torch.max(outputs, 1)   
                 
-                print(img_name, int(not preds.data))
+                predictions["label"].append(int(not preds.data))
             else:
-                print(-1)
+                predictions["label"].append(-1)
+                
+    df = pd.DataFrame.from_dict(predictions)
+    df.to_csv(args.out_csv, header=False, index=False)

@@ -18,6 +18,8 @@ import os
 from net import fine_tune_model
 
 from tensorboardX import SummaryWriter
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split
 
 
 def train_model(data_loader, model, criterion, optimizer, scheduler, num_epochs=15):
@@ -102,20 +104,25 @@ train_data = ImageFolder(root='train_data', transform = transforms.Compose([
         transforms.Normalize([0.485, 0.456, 0.406],
                              [0.229, 0.224, 0.225])
     ]))
+targets = train_data.targets
+train_idx, valid_idx= train_test_split(np.arange(len(targets)), test_size=0.2, shuffle=True, stratify=targets)
+
+train = data.Subset(train_data, train_idx)
+valid = data.Subset(train_data, valid_idx)
 
 #print(train_data.class_to_idx)
     
-VALID_RATIO = 0.8
+# VALID_RATIO = 0.75
 BATCH_SIZE = 256
 
-n_train_examples = int(len(train_data) * VALID_RATIO)
-n_valid_examples = len(train_data) - n_train_examples
+# n_train_examples = int(len(train_data) * VALID_RATIO)
+# n_valid_examples = len(train_data) - n_train_examples
 
-train_data, valid_data = data.random_split(train_data, [n_train_examples, n_valid_examples])
+# train_data, valid_data = data.random_split(train_data, [n_train_examples, n_valid_examples])
 
 dataloaders = {
-    'train':data.DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=True),
-    'valid':data.DataLoader(valid_data, batch_size=BATCH_SIZE, shuffle=True)
+    'train':data.DataLoader(train, batch_size=BATCH_SIZE, shuffle=True),
+    'valid':data.DataLoader(valid, batch_size=BATCH_SIZE, shuffle=True)
 }
 
 writer = SummaryWriter()
