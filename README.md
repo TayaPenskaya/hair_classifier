@@ -14,7 +14,7 @@ python main.py --in-dir "imgs/"
 
 ## Solution
 
-Изображение -> *детекчу лицо* -> bounding box -> маска для волос -> сверточный классификатор на pretrained resnet'e.
+Изображение -> bounding box для лица -> маска для волос -> сверточный классификатор на pretrained resnet'e.
 
 ## ToDo
 
