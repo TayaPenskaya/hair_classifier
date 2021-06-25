@@ -19,22 +19,21 @@ except ImportError:
     
 class FaceParsing:
     
-    def __init__(self, model_path='cp/79999_iter.pth'):
+    def __init__(self, model_path='hair_segmentation/cp/79999_iter.pth'):
         self.n_classes = 19
         self.net = BiSeNet(n_classes=self.n_classes)
         self.net.cuda()
         self.net.load_state_dict(torch.load(model_path))
         self.net.eval()
         
-    def get_parsing(self, image_path):
+    def get_parsing(self, image):
         to_tensor = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
         ])
 
         with torch.no_grad():
-            img = Image.open(image_path)
-            image = img.resize((512, 512), Image.BILINEAR)
+            image = image.resize((512, 512), Image.BILINEAR)
             img = to_tensor(image)
             img = torch.unsqueeze(img, 0)
             img = img.cuda()
@@ -58,7 +57,7 @@ def get_hair_mask(image, parsing, part=17, color=[255, 255, 255], save_im=False,
     changed[parsing != part] = [[0,0,0]]
 
     if save_im:
-        cv2.imwrite(save_path, changed)
+        cv2.imwrite(save_path, cv2.resize(changed, (512, 512)))
 
     return changed
 
@@ -110,13 +109,13 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
-    
-    fp = FaceParsing()
-    
+
     save_path = args.out_dir
     os.makedirs(save_path, exist_ok=True)
     
     files = glob.glob(os.path.join(args.in_dir, "*.png")) + glob.glob(os.path.join(args.in_dir, "*.jpg")) + glob.glob(os.path.join(args.in_dir, "*.jpeg")) + glob.glob(os.path.join(args.in_dir, "*.bmp"))
+    
+    fp = FaceParsing(args.model_path)
 
     for f in files:
         img_name = f.split("/")[-1]
@@ -126,7 +125,8 @@ if __name__ == '__main__':
         out_path_hair = os.path.join(save_path, name + '_hair.jpg')
         out_path_face = os.path.join(save_path, name + '_face.jpg')
 
-        parsing = fp.get_parsing(f)
+        img = Image.open(f)
+        parsing = fp.get_parsing(img)
         parsing = cv2.resize(parsing, image.shape[0:2][::-1], interpolation=cv2.INTER_NEAREST)
         face = get_face_segmentation(image, parsing, stride=1, save_im=True, save_path=out_path_face)
         hair_mask = get_hair_mask(image, parsing, save_im=True, save_path=out_path_hair)
