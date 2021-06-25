@@ -57,7 +57,7 @@ def get_hair_mask(image, parsing, part=17, color=[255, 255, 255], save_im=False,
     changed[parsing != part] = [[0,0,0]]
 
     if save_im:
-        cv2.imwrite(save_path, cv2.resize(changed, (512, 512)))
+        cv2.imwrite(save_path, cv2.resize(changed, (256, 256)))
 
     return changed
 
