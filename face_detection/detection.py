@@ -42,7 +42,7 @@ class TestBaseTransform:
     
 class FaceDetection:
     
-    def __init__(self, model_path="./weights/dsfdv2_r18.pth"):
+    def __init__(self, model_path="face_detection/weights/dsfdv2_r18.pth"):
         FPN_Genotype = namedtuple("FPN_Genotype", "Inter_Layer Out_Layer")
         AutoFPN = FPN_Genotype(
             Inter_Layer=[
@@ -62,7 +62,6 @@ class FaceDetection:
             layers=1,
             phase="test",
             search=False,
-            args=args,
             searched_fpn_genotype=AutoFPN,
             searched_cpm_genotype=None,
             fpn_layers=1,
@@ -92,7 +91,7 @@ class FaceDetection:
         x = x.unsqueeze(0).cuda()
         return x
     
-    def get_box_with_best_score(self, img):
+    def get_box_with_best_score(self, img, img_cv2, thresh=0.8):
         # post-processing
         detections = self.net(img).view(-1, 5)
         # scale each detection back up to the image
@@ -108,7 +107,7 @@ class FaceDetection:
         boxes = detections[..., 1:] * scale
 
         # filter the boxes whose score is smaller than 0.8
-        keep_mask = (scores >= args.thresh) & (boxes[..., -1] > 2.0)
+        keep_mask = (scores >= thresh) & (boxes[..., -1] > 2.0)
         scores = scores[keep_mask]
         boxes = boxes[keep_mask]
         
@@ -131,10 +130,10 @@ def get_cropped_img(img_cv2, box, save_im=False, save_path=None):
     diff_y = abs(box[3] - box[1])*0.5
     diff = max(diff_x, diff_y)
 
-    lb_x = max(0, c_x - round(diff*1.75))
-    lb_y = max(0, c_y - round(diff*1.75))
-    hb_x = min(c_x + round(diff*1.75), img_cv2.shape[1])
-    hb_y = min(c_y + round(diff*1.75), img_cv2.shape[0])
+    lb_x = max(0, c_x - round(diff*2))
+    lb_y = max(0, c_y - round(diff*2))
+    hb_x = min(c_x + round(diff*2), img_cv2.shape[1])
+    hb_y = min(c_y + round(diff*2), img_cv2.shape[0])
     cropped_img = img_cv2[lb_y:hb_y, lb_x:hb_x]
     img_cv2 = cv2.rectangle(img_cv2, (lb_x, lb_y), (hb_x, hb_y), color=(0, 0, 255), thickness=2)
     
@@ -148,7 +147,6 @@ def parse_args():
     parser.add_argument("--model-path", default="./weights/dsfdv2_r18.pth", type=str, help="Trained state_dict file path to open")
     parser.add_argument("--in-dir", default='imgs', type=str, help="where images are stored")
     parser.add_argument("--out-dir", default='results/', type=str, help="where results will be stored")
-    parser.add_argument("--thresh", default=0.8, type=float, help="Final confidence threshold")
     return parser.parse_args()
 
 
@@ -160,7 +158,7 @@ if __name__ == '__main__':
 
     files = glob.glob(os.path.join(args.in_dir, "*.png")) + glob.glob(os.path.join(args.in_dir, "*.jpg")) + glob.glob(os.path.join(args.in_dir, "*.jpeg")) + glob.glob(os.path.join(args.in_dir, "*.bmp"))
     
-    fd = FaceDetection()
+    fd = FaceDetection(args.model_path)
     
     for f in files:
         img_name = f.split("/")[-1]
@@ -169,7 +167,7 @@ if __name__ == '__main__':
             
             img_cv2 = cv2.imread(f)
             img = fd.preprocess(img_cv2)
-            box = fd.get_box_with_best_score(img)
+            box = fd.get_box_with_best_score(img, img_cv2)
             if len(box) == 4:
                 cropped_img, img_cv2 = get_cropped_img(img_cv2, box, save_im=True, save_path=os.path.join(save_path, os.path.splitext(img_name)[0] + '_face.jpg'))
     
