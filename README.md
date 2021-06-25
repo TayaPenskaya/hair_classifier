@@ -16,6 +16,10 @@ python main.py --in-dir "imgs/"
 
 Изображение -> bounding box для лица -> маска для волос -> сверточный классификатор на pretrained resnet'e.
 
+[маска для волос](./hair_segmentation)
+[bounding box для лица](./face_detection)
+[скрипт для тренировки классификатора](./train.py)
+
 ## ToDo
 
 Есть варианты для модель, которые не опробованы:
