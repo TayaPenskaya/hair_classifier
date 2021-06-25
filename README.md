@@ -14,7 +14,7 @@ python main.py --in-dir "imgs/"
 
 ## Solution
 
-Изображение -> bounding box для лица -> маска для волос - `сверточный классификатор на pretrained resnet'e` -> метка класса
+Изображение -> bounding box для лица -> маска для волос -> сверточный классификатор на pretrained resnet'e -> метка класса
 
 - [маска для волос](./hair_segmentation)
 - [bounding box для лица](./face_detection)
