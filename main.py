@@ -74,10 +74,10 @@ if __name__ == '__main__':
                 parsing = fp.get_parsing(cropped_img_pil)
                 parsing = cv2.resize(parsing, cropped_img.shape[0:2][::-1], interpolation=cv2.INTER_NEAREST)
                 #face = get_face_segmentation(image, parsing, stride=1, save_im=True, save_path=os.path.join(out_path_face, img_name))
-                hair_mask = get_hair_mask(cropped_img, parsing, save_im=True, save_path=os.path.join(out_path_hair, img_name))
+                hair_mask = get_hair_mask(cropped_img, parsing, save_im=False, save_path=os.path.join(out_path_hair, img_name))
                 
-                img=Image.open(os.path.join(out_path_hair, img_name)).convert('RGB')
-                inputs=preprocess(img).unsqueeze(0).cuda()
+                #img=Image.open(os.path.join(out_path_hair, img_name)).convert('RGB')
+                inputs=preprocess(Image.fromarray(cv2.cvtColor(hair_mask, cv2.COLOR_BGR2RGB))).unsqueeze(0).cuda()
                 outputs = model(inputs)
                 _, preds = torch.max(outputs, 1)   
                 
