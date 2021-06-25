@@ -10,6 +10,7 @@ pip install -r requirements.txt
 ```
 python main.py --in-dir "imgs/"
 ```
+Дополнительно в коде можно настроить так, чтобы bbox для лица и маски волос сохранялись в указанную `out-dir` директорию.
 
 ## ToDo
 
