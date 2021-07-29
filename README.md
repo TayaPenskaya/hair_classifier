@@ -1,6 +1,10 @@
 # Hair classifier
 Classifier for hair length
 
+<p align="center">
+  <img src="./structure.png" alt="structure" width="1000"/>
+</p>
+
 ## Installing:
 ```
 pip install -r requirements.txt
